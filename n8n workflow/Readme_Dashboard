@@ -1,0 +1,46 @@
+n8n_scrapper
+To Run this workflow first of all you have to create your RSS app feed for your RSS node 
+Here are the following steps you have to follow:-
+1. First go to Google news for the feeds that we need for scraping 
+2. choose any field from the google news eg. (World, India, Tecnology, Health, etc)
+3. After choosing the field from that copy the Url of that page 
+4. Go to RSS app click on new feed paste the url into it 
+5. after pasting it hit generate to generate your RSS feed 
+6. After genrating the feed click on customize button which shows on right side of the feed
+7. Inside that customize you see no of post which is default at 25 make it to 1 
+   because our workflow is currently scrapping one feed at a time.
+8. After doing that you can see the feed Url copy that url and make sure that the extension will be xml
+9. then go the n8n_scrapping workflow paste that url inside the RSS Read node 
+10. thats how your RSS node is ready for execute 
+
+Now after that you can see on the workflow a chat model(gemini) that is connected to ai agent so you have to add your credentials into that node 
+after that you can see the firecrawl scrapper tool that is connected to ai agent where the ai agent is using that tool for scrapping the given url 
+
+Here is the following steps to setup you firecrawl tool node :-
+1. first go to the firecrawl website(https://www.firecrawl.dev) then do Sign up.
+2.  then go to Dashboard inside the Firecrawl Website then on the left side you can see the Api key option go to that if you not created any api key then click on create api key
+after that copy the api key 
+3. then come back to you n8n workflow go into the firecrawl scraping  tool node under that you can see a create credentials into that for the name Write Authorization and for the api key the format 
+  will be (Bearer <API_key>)
+4. Now your Firecrawl node is ready to scrape 
+
+and in the workflow you can see  the the code node what it does basically format the ai agent json output for the google sheet node 
+
+lets setup the Google sheet node, here are the following steps to follow:-
+1. create a google sheet inside your browser where n8n is open 
+2. name that sheet according to your convinence 
+3. the headers of each column  the sheet will be in this format Domain,	Category,	Title,	articles,	URL,	trending_keywords,	Publication_Date,	cover_image,	author_name.
+4. now inside the google sheet node connect it with you credentials 
+5. now there is the column Document select the dropdown with by id and paste the google sheet id that you created , for the id go to the google sheet that you created see inside the url after the spredsheets/and before /edit copy that 
+and paste it on the document column inside your google sheet node 
+6. after pasting the id below that column you can see the sheet column select you sheet name there after that it will mapp all the column from the sheets 
+now you have to run the full workflow after running it go to the google sheet node and inside the output pannel drag every field from that panel to the columns that are empty after dragging all the fields exicute the node. 
+now this workflow will run properly and all the scraping data is stored inside your google sheet.
+
+
+
+
+
+
+
+
