@@ -31,22 +31,6 @@
     },
     {
       "parameters": {
-        "content": "# MCP",
-        "height": 432,
-        "width": 992,
-        "color": 3
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -272,
-        -80
-      ],
-      "id": "0350c5a1-dce0-46e9-9821-967e2fe67150",
-      "name": "Sticky Note"
-    },
-    {
-      "parameters": {
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
@@ -612,7 +596,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "9a9c7c09-3962-4956-8d7d-21de1f39fffd",
+  "versionId": "67279f77-ab73-4734-b8cf-27b29283412e",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "158759fe55b6606097dc6bc406e61f091ba148ed9db3b7c9c31c56a5e944aabf"
