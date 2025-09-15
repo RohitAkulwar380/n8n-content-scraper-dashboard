@@ -1,0 +1,622 @@
+{
+  "name": "n8nscrapper",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.link }}",
+        "options": {
+          "systemMessage": "=# AI Research Agent - RSS + Firecrawl System Message\n\nYou are an advanced AI Research Agent that processes RSS feed data and Firecrawl scraped content. Your PRIMARY task is to extract and analyze REAL content from RSS articles - never generate fake or hallucinated content.\n\n## CRITICAL RULES:\n- **PROCESS REAL RSS + SCRAPED DATA ONLY** - Never create fake articles\n- **VERIFY SCRAPED CONTENT** - Ensure Firecrawl returned actual webpage content\n- **IF SCRAPING FAILS** - Report the failure, don't make up content\n- **REAL ARTICLES ONLY** - Extract actual headlines, dates, and content from RSS + scraped data\n\n## Your Workflow Context:\n\nYou will receive data from two sources:\n1. **RSS Feed Trigger**: Provides article metadata (title, URL, publication date, description)\n2. **Firecrawl Tool**: Provides structured article data including full content, cover image, author, and publication date\n\n## Data Processing Steps:\n\n### Step 1: RSS Data Validation\nFrom the RSS Feed Trigger, you'll receive:\n- **RSS Title**: Original article headline from RSS feed\n- **RSS URL**: Article URL from RSS feed\n- **RSS Publication Date**: Original publication date\n- **RSS Description**: Brief description/excerpt from RSS feed\n\n**Validation Rules:**\n- Verify RSS data contains valid article information\n- Ensure URLs are properly formatted\n- Check that dates are realistic and properly formatted\n\n### Step 2: Firecrawl Content Analysis\nUsing the Firecrawl tool, extract structured article data including:\n- **article_url**: Verify this matches the RSS URL\n- **clean_article**: Full article content from headline to final paragraph\n- **cover_image**: URL of the main article's cover image\n- **author_name**: Name of the article's author\n- **publication_date**: Article publication date in ISO 8601 format\n\n**Firecrawl Configuration:**\nThe Firecrawl tool is configured to extract only core article content with the following schema:\n```json\n{\n  \"article_url\": \"The full URL of the article\",\n  \"clean_article\": \"Main article content formatted as clean text\",\n  \"cover_image\": \"URL of the main article's cover image\",\n  \"author_name\": \"Name of the article's author\",\n  \"publication_date\": \"Publication date in ISO 8601 format\"\n}\n```\n\n### Step 3: Data Integration & Enhancement\nCombine RSS data with Firecrawl extracted content:\n\n**Primary Article Data (from RSS + Firecrawl):**\n- **title**: Use RSS title (most reliable source)\n- **url**: Original RSS article URL\n- **publication_date**: Use RSS publication date as primary, Firecrawl date as secondary\n- **description**: Enhanced description from RSS + scraped content\n- **full_content**: Clean article text from Firecrawl\n- **cover_image**: Main article image URL from Firecrawl\n- **author_name**: Author name from Firecrawl\n- **domain**: Extract domain from RSS URL\n\n**Enhanced Analysis (from scraped content):**\n- **trending_keywords**: 3-5 trending/important terms extracted from the clean article content\n- **category**: Dynamic category based on article content analysis\n\n### Step 4: Content Validation\nBefore outputting results:\n- **Verify RSS URL matches Firecrawl article_url**\n- **Confirm cover_image URL is valid and accessible**\n- **Validate author_name is extracted correctly**\n- **Cross-reference publication dates between RSS and Firecrawl**\n- **Ensure trending keywords are derived from actual article content**\n\n## Output Format:\n\n### Success Output:\n```json\n{\n  \"Domain\": \"[DOMAIN FROM RSS URL]\",\n  \"Category\": \"[CATEGORY BASED ON ARTICLE CONTENT]\",\n  \"Title\": \"[RSS FEED TITLE]\",\n  \"Description\": \"[ENHANCED DESCRIPTION FROM RSS + CLEAN ARTICLE]\",\n  \"URL\": \"[ORIGINAL RSS ARTICLE URL]\",\n  \"publication_date\": \"[RSS PUBLICATION DATE]\",\n  \"cover_image\": \"[COVER IMAGE URL FROM FIRECRAWL]\",\n  \"author_name\": \"[AUTHOR NAME FROM FIRECRAWL]\",\n  \"full_content\": \"[CLEAN ARTICLE CONTENT FROM FIRECRAWL]\",\n  \"trending_keywords\": \"[TRENDING TERMS FROM ARTICLE CONTENT]\",\n  \"content_source\": \"RSS + Firecrawl\",\n  \"scraping_status\": \"SUCCESS\"\n}\n```\n\n### Error Handling:\n```json\n{\n  \"Domain\": \"[DOMAIN FROM RSS URL]\",\n  \"Category\": \"SCRAPING_FAILED\",\n  \"Title\": \"[RSS FEED TITLE]\",\n  \"Description\": \"[RSS DESCRIPTION ONLY - SCRAPING FAILED]\",\n  \"URL\": \"[ORIGINAL RSS ARTICLE URL]\",\n  \"publication_date\": \"[RSS PUBLICATION DATE]\",\n  \"cover_image\": \"\",\n  \"author_name\": \"\",\n  \"full_content\": \"\",\n  \"trending_keywords\": \"[]\",\n  \"content_source\": \"RSS Only\",\n  \"scraping_status\": \"FAILED\"\n}\n```\n\n## Specific Processing Instructions:\n\n### RSS Data Priority:\n- **Always use RSS title** as the primary article title\n- **Always use RSS URL** as the article URL (never modify or construct URLs)\n- **Always use RSS publication date** as primary timestamp\n- **Use RSS description** as fallback if scraping fails\n\n### Firecrawl Enhancement:\n- **Extract cover_image URL** for article visual representation\n- **Get author_name** for article attribution\n- **Extract clean_article content** for comprehensive analysis\n- **Cross-reference publication_date** with RSS date\n- **Identify trending topics** from complete article content\n\n### Data Reliability:\n- **RSS data is authoritative** for basic article metadata\n- **Firecrawl content enhances** with structured article data\n- **Always indicate data source** (RSS only vs RSS + Firecrawl)\n- **Handle scraping failures gracefully** by falling back to RSS data\n\n## Quality Assurance:\n\n### Validation Checklist:\n- [ ] RSS feed data received and validated\n- [ ] Firecrawl tool executed successfully for structured content extraction\n- [ ] Article title matches RSS feed title\n- [ ] Article URL is original RSS URL (never modified)\n- [ ] Cover image URL extracted and validated as article's featured image (not website logo)\n- [ ] Author name properly extracted\n- [ ] Publication date cross-referenced between sources\n- [ ] Trending keywords based on actual article content\n- [ ] Fallback to RSS-only data if scraping fails\n- [ ] No hallucinated or fake content included\n\n**REMEMBER**: RSS provides reliable metadata, Firecrawl provides structured content including cover images and author information. Combine both for comprehensive, accurate article analysis. Never fabricate content when scraping fails - use RSS data and mark scraping status appropriately."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        32,
+        -64
+      ],
+      "id": "6c0e05dd-a182-4cba-8be6-81df74cbf632",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        176
+      ],
+      "id": "7fab5690-354c-4a4c-9b98-f5b42aa6c74d",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "content": "# MCP",
+        "height": 432,
+        "width": 992,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        -80
+      ],
+      "id": "0350c5a1-dce0-46e9-9821-967e2fe67150",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        176
+      ],
+      "id": "c5e6dfc7-870a-4123-83f0-f7e03a05f7fa",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Tlm2klB7NvRVpKSe",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "13PTK3jNdVlLE6PrND7p6lMl5YdwFxCjUzRt43C7IQgE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "urlInputs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/13PTK3jNdVlLE6PrND7p6lMl5YdwFxCjUzRt43C7IQgE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Domain": "={{ $json.parsed.Domain }}",
+            "Category": "={{ $json.parsed.Category }}",
+            "URL": "={{ $json.parsed.URL }}",
+            "trending_keywords": "={{ $json.parsed.trending_keywords }}",
+            "articles": "={{ $json.parsed.Description }}",
+            "Title": "={{ $json.parsed.Title }}",
+            "Publication_Date": "={{ $json.parsed.publication_date }}",
+            "cover_image": "={{ $json.parsed.cover_image }}",
+            "author_name": "={{ $json.parsed.author_name }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Domain",
+              "displayName": "Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "articles",
+              "displayName": "articles",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "trending_keywords",
+              "displayName": "trending_keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Publication_Date",
+              "displayName": "Publication_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "cover_image",
+              "displayName": "cover_image",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "author_name",
+              "displayName": "author_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        544,
+        -64
+      ],
+      "id": "ef278960-8f7f-436a-8c54-53eaf7d9ea61",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GZSUEPAju1D0ZCmC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Clean AI Agent output with embedded JSON + NL summary\nconst input = items[0].json;\n\n// Step 1: If wrapped under \"output\"\nlet raw = input.output || input;\n\n// Step 2: Extract JSON array inside triple backticks\nif (typeof raw === 'string') {\n  const match = raw.match(/```json([\\s\\S]*?)```/i);\n  if (match) {\n    raw = match[1].trim();\n  }\n}\n\n// Step 3: Try to parse JSON\nlet parsed;\ntry {\n  parsed = JSON.parse(raw);\n} catch (err) {\n  return [{ json: { error: \"Failed to parse JSON\", raw } }];\n}\n\n// Step 4: Return each article as a row\nif (Array.isArray(parsed)) {\n  return parsed.map(article => ({ json: article }));\n}\n\nreturn [{ json: { error: \"Unexpected format\", parsed } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        -64
+      ],
+      "id": "45e05761-53db-4067-8a66-c3950c04fbb0",
+      "name": "Code",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 192,
+        "width": 352,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        320,
+        160
+      ],
+      "id": "aa268453-ff25-40f7-a392-ce6b8f357354",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "toolDescription": "={\n  \"url\": \"{{ $input.item.json.link }}\",\n  \"formats\": [\"markdown\", \"html\"],\n  \"includeTags\": [\"a\", \"h1\", \"h2\", \"h3\", \"article\", \"time\", \"span\", \"div\", \"p\"],\n  \"excludeTags\": [\"script\", \"style\", \"nav\", \"footer\", \"aside\", \"ad\"],\n  \"onlyMainContent\": false,\n  \"waitFor\": 2000,\n  \"timeout\": 30000\n}",
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v2/scrape",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"url\": \"{{ $input.item.json.link }}\",\n  \"formats\": [\n    {\n      \"type\": \"json\",\n      \"prompt\": \"You are extracting content from a news website. Extract ONLY the core article and the {{ $input.item.json.link }} of that core article that someone came to read - nothing else. This means: the main headline, URL, cover image, author name, publication date, and the consecutive paragraphs that tell the complete news story from beginning to end. Stop when you reach promotional content, related articles, or repetitive material. Do NOT include: navigation elements, 'Just In' sections, 'Don't Miss' sections, 'More From' sections, advertisement content, subscription prompts, social media elements, author bios beyond the name, comment sections, or any content that appears to be website navigation or recommendations.\",\n      \"schema\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"article_url\": {\n            \"type\": \"string\",\n            \"description\": \"The full URL of the article being extracted\"\n          },\n          \"clean_article\": {\n            \"type\": \"string\",\n            \"description\": \"Main article content from headline through the final paragraph of the actual news story, formatted as clean text\"\n          },\n          \"cover_image\": {\n            \"type\": \"string\",\n            \"description\": \"URL of the main article's cover image\"\n          },\n          \"author_name\": {\n            \"type\": \"string\",\n            \"description\": \"Name of the article's author\"\n          },\n          \"publication_date\": {\n            \"type\": \"string\",\n            \"description\": \"Publication date of the article in ISO 8601 format if possible\"\n          }\n        },\n        \"required\": [\"article_url\", \"clean_article\", \"cover_image\", \"author_name\", \"publication_date\"]\n      }\n    }\n  ],\n  \"excludeTags\": [\"nav\", \"aside\", \"footer\", \"header\", \"script\", \"style\", \"iframe\", \"form\", \"button\", \"figure\"],\n  \"onlyMainContent\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        208
+      ],
+      "id": "4d1d71ec-0055-45b2-bd54-8273383cf109",
+      "name": "fire crawl scrapper",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "x35pI6sbl0ry4HtQ",
+          "name": "FireCrawl"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -768,
+        -240
+      ],
+      "id": "9e27f6d6-967e-4a12-a124-0de67d98d6df",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -752,
+        -48
+      ],
+      "id": "371778ec-0490-487e-ac5d-3f45e7fabc8e",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -752,
+        112
+      ],
+      "id": "0d488c2b-02d9-459f-8d96-d7ac9431a1c2",
+      "name": "Schedule Trigger2"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -736,
+        256
+      ],
+      "id": "52922868-6c01-4a01-8672-b4b8f4d603b5",
+      "name": "Schedule Trigger3"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -768,
+        -384
+      ],
+      "id": "fe046162-38ce-45d6-9296-5c1242b26a02",
+      "name": "Schedule Trigger4"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/TEIV0IeB2mxIpxkV.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -544,
+        -384
+      ],
+      "id": "0cfc8d2e-b0d6-49c5-9e74-4303d80aa4b4",
+      "name": "Health1"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/WT8YEIHNBKqzAit4.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -544,
+        -224
+      ],
+      "id": "12ab9700-7b38-45cb-ab95-122eeecb9b6d",
+      "name": "world news"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/PkWICJJV3MKkInX5.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -544,
+        -48
+      ],
+      "id": "f3d81efa-09eb-4850-bd76-9fa07c04704d",
+      "name": "Entertainment1"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/VfwD6XntNxDBZoHr.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -544,
+        112
+      ],
+      "id": "5fb86523-6a45-4298-b55e-026573e9c308",
+      "name": "Technology"
+    },
+    {
+      "parameters": {
+        "url": "https://rss.app/feeds/k4jxy5iFBOjGy5w2.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -544,
+        256
+      ],
+      "id": "0da7e54c-671f-41b9-b39f-079a5e3aab44",
+      "name": "Sports"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        []
+      ]
+    },
+    "fire crawl scrapper": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger4": {
+      "main": [
+        [
+          {
+            "node": "Health1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Health1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "world news",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "world news": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Entertainment1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Entertainment1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger2": {
+      "main": [
+        [
+          {
+            "node": "Technology",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Technology": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger3": {
+      "main": [
+        [
+          {
+            "node": "Sports",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sports": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9a9c7c09-3962-4956-8d7d-21de1f39fffd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "158759fe55b6606097dc6bc406e61f091ba148ed9db3b7c9c31c56a5e944aabf"
+  },
+  "id": "ngVPp5gnxMUdI2O6",
+  "tags": []
+}
