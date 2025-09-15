@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ai_table_urlinputs {
+  ai_table_identifier String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  row_number          String?
+  Domain              String?
+  Category            String?
+  Title               String?
+  articles            String?
+  URL                 String?
+  Publication_Date    String?
+  Date                String?  // Alias for Publication_Date for API compatibility
+  Summary             String?  // Article summary
+  keywords            String?  // JSON string of keywords
+  trending_keywords   String?  // JSON string of trending keywords
+  sentiment_label     String?  // Sentiment analysis label
+  sentiment_score     String?  // Sentiment score as string
+  quality_score       String?  // Quality score as string
+  author_name         String?
+  cover_image         String?
+}
+
+model monitored_sources {
+  id           String   @id @default(cuid())
+  url          String   @unique
+  domain       String
+  category     String?
+  is_active    Boolean  @default(true)
+  last_scraped DateTime?
+  created_at   DateTime @default(now())
+}

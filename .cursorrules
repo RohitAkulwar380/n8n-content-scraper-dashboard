@@ -1,0 +1,165 @@
+# AI Content Scraper Dashboard - Development Guidelines
+
+## Project Overview
+This is a Next.js 15.3.3 application serving as the dashboard interface for an AI-powered Content Scraper system. The dashboard connects to a PostgreSQL database populated by N8N workflows that fetch, process, and categorize content from multiple websites across domains like Financial Markets, Mental Health, Insurance, and other knowledge areas.
+
+## System Architecture
+
+Google Drive (URLs Sheet) → N8N Workflow → PostgreSQL Database → Next.js Dashboard
+
+
+### Data Flow
+1. *N8N Workflow*: Fetches URL list from Google Drive sheet
+2. *Content Processing*: Scrapes websites, processes with NLP, categorizes content
+3. *Database Storage*: Stores processed articles with metadata in PostgreSQL
+4. *Dashboard Interface*: Presents categorized content, trends, and filtering options
+
+## Tech Stack
+### Core Dependencies
+- *Next.js*: 15.3.3 (App Router)
+- *React*: 19.0.0
+- *TypeScript*: 5.x
+- *Database*: PostgreSQL with Prisma 6.9.0 ORM
+- *Styling*: Tailwind CSS 4.x with custom CSS variables
+- *UI Components*: Radix UI primitives with shadcn/ui patterns
+- *Package Manager*: NPM
+
+### Additional Dependencies for Content Scraper
+- *Data Visualization*: Recharts for trending topics charts
+- *Date Handling*: date-fns for article filtering by date ranges
+- *Text Search*: Native PostgreSQL full-text search
+- *Real-time Updates*: Server Components with revalidation
+
+## Database Schema (Prisma Models)
+
+### Core Models
+prisma
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  color       String?   // For UI categorization
+  articles    Article[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Article {
+  id          String    @id @default(cuid())
+  title       String
+  content     String    @db.Text
+  summary     String?   @db.Text
+  url         String    @unique
+  sourceUrl   String    // Original website URL
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+  tags        String[]  // Array of trending keywords
+  publishedAt DateTime?
+  scrapedAt   DateTime  @default(now())
+  relevanceScore Float? // AI-generated relevance score
+  sentiment   String?   // positive, negative, neutral
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([categoryId])
+  @@index([scrapedAt])
+  @@index([publishedAt])
+}
+
+model TrendingTopic {
+  id         String   @id @default(cuid())
+  keyword    String
+  category   String
+  frequency  Int
+  period     String   // daily, weekly, monthly
+  createdAt  DateTime @default(now())
+  
+  @@unique([keyword, category, period, date])
+  @@index([category, period, date])
+}
+
+model SourceWebsite {
+  id          String   @id @default(cuid())
+  name        String
+  url         String   @unique
+  category    String
+  isActive    Boolean  @default(true)
+  lastScraped DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+### API Routes for N8N Integration
+
+#### Core API Endpoints
+typescript
+// /api/sync-status - Get current sync status
+GET /api/sync-status?sheetId=string
+
+// /api/categories - Get dynamic categories from database
+GET /api/categories
+
+// /api/content - Get filtered content
+GET /api/content?category=string&dateFrom=string&dateTo=string&page=number
+
+// /api/trending - Get trending topics
+GET /api/trending?category=string&timeframe=string
+
+// /api/trigger-sync - Manual trigger for N8N workflow (webhook)
+POST /api/trigger-sync { sheetId: string }
+
+// /api/export - Export filtered data
+POST /api/export { filters: object, format: 'csv' | 'json' }
+
+
+## Development Rules & Guidelines
+
+### NEVER USE
+- middleware.ts - Authentication and routing handled in components/pages
+- "use client;" in layout.tsx or page.tsx files - Only use in actual components  
+- npm run build unless specifically requested - Assume npm run dev is running
+- Hard-coded categories - All categories must be dynamic from database
+
+### Always Use
+- *Package Manager*: NPM for all package operations
+- *Server Components*: Default for data fetching and static content
+- *App Router*: Use Next.js 15 App Router patterns  
+- *TypeScript*: Strict typing for all code
+- *Dynamic Schema*: Support flexible database schema based on Google Sheet structure
+- *Error Boundaries*: Proper error handling for N8N workflow failures
+
+### Route Parameters
+When a route uses params, always follow this pattern:
+typescript
+// CORRECT
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  // use id here
+}
+
+
+### Database Integration Patterns
+- *Dynamic Queries*: Build queries based on available sheet columns
+- *Flexible Filtering*: Support filtering on any field from Google Sheet
+- *Real-time Sync*: Show live sync status from N8N workflow
+- *Error Handling*: Graceful handling of missing or invalid data
+
+### Content Display Rules
+- *Dynamic Categories*: Categories loaded from database, not hard-coded
+- *Flexible Content Fields*: Display any fields present in scraped data
+- *Search Functionality*: Full-text search across all content fields
+- *Export Options*: Allow users to export filtered results
+- *Responsive Design*: Mobile-friendly dashboard interface
+
+### N8N Webhook Integration
+- *Sync Triggers*: API endpoints to trigger N8N workflows
+- *Status Updates*: Real-time sync progress and status display  
+- *Error Reporting*: Display N8N workflow errors in dashboard
+- *Manual Controls*: Allow manual re-sync of specific sources
+
+This dashboard serves as the user interface for the AI Content Scraper system, providing dynamic category filtering, trending analysis, and content management capabilities based on data processed through your N8N workflow.
